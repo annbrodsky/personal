@@ -1,0 +1,40 @@
+var visitor = Visitor.getInstance("CB68E4BA55144CAA0A4C98A5");
+var adobeVisitors = {
+    aid : visitor.getAnalyticsVisitorID(),
+    mid : visitor.getMarketingCloudVisitorID(),
+    fid : utag.data["cp.s_fid"]
+}
+var aid = visitor.getAnalyticsVisitorID();
+var mid = visitor.getMarketingCloudVisitorID();
+var fid = utag.data["cp.s_fid"];
+var visitorCookies = [];
+function visitorIsSet(cookie){
+    if(typeof(cookie) != 'undefined' && cookie.length > 0){
+        return true
+    }else {
+        return false
+    }
+}
+for(visitor in adobeVisitors){
+      if(visitorIsSet(adobeVisitors[visitor]) === true){
+           var type;
+           switch(visitor){
+            case 'aid':
+              type = '3'
+              break;
+            case 'mid':
+                type = '5'
+                break;
+            case 'fid':
+                type = '4'
+           }
+       visitorCookies.push(type + ':' + visitor)
+    }
+}
+if(visitorCookies.length > 0){
+    utag.data['adobe_visitor_types'] = visitorCookies.join('|');
+    utag_data['adobe_visitor_types'] = visitorCookies.join('|');
+}else {
+    utag.data['adobe_visitor_types'] = 'other';
+
+}
