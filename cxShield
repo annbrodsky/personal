@@ -1,0 +1,50 @@
+(async () => {
+  let cxShield = b.cx_shield;
+
+  if (!cxShield && window.entitlementsAsyncData) {
+    const entitlementsData = await window.entitlementsAsyncData;
+    const paywallData = entitlementsData.paywall;
+
+    if (paywallData) {
+      cxShield = paywallData;
+    }
+  }
+
+/* the new code, to minimize names that are coming from paywall
+eVar56 == {"paywallType":"",
+            "expId":"",
+            "pageViewId":"",
+            "pageMeters":[{views":,"viewsLeft":,"maxViews":,"totalViews":}],
+            "experienceOutcome":{"server_side_experience":""}}
+      would be replaced  with
+eVar56 == {"paywallType":"",
+            "expId":"",
+            "pageViewId":"",
+            "meters":[{v":,"vl":,"mv":,"tv":}],
+            "eo":""}
+
+*/
+  if (cxShield && typeof cxShield === 'object') {
+    const { pageMeters, experienceOutcome, ...rest } = cxShield;
+    cxShield = rest;
+
+    if (Array.isArray(pageMeters)) {
+      cxShield.meters = pageMeters.map(({ views, viewsLeft, maxViews, totalViews }) => ({
+        v: views,
+        vl: viewsLeft,
+        mv: maxViews,
+        tv: totalViews,
+      }));
+    }
+
+    if (experienceOutcome?.server_side_experience) {
+      cxShield.eo = experienceOutcome.server_side_experience;
+    }
+  }
+
+  if (cxShield != null && typeof cxShield !== 'string') {
+    cxShield = JSON.stringify(cxShield);
+  }
+
+  b.cx_shield_post = cxShield;
+})();
